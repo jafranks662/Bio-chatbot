@@ -5,7 +5,7 @@ import { neon } from '@neondatabase/serverless';
 const sql = neon(process.env.DATABASE_URL!);
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages, mode } = await req.json();
 
   const result = await streamText({
     model: openai("gpt-4-turbo"),
@@ -44,7 +44,10 @@ Quiz me ->
 5. List of missed questions with correct answers and brief explanations
 
 Switch modes when the user types "quiz me" or "study mode".`,
-    messages,
+    messages: [
+      { role: "system", content: `Mode: ${mode}` },
+      ...messages,
+    ],
     onFinish: async (completion) => {
       try {
         const lastMessage = messages[messages.length - 1];
