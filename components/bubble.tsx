@@ -21,7 +21,16 @@ import { useChat } from "ai/react";
 import Markdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
-export const Bubble = () => {
+type Mode = "study" | "quiz";
+
+interface BubbleProps {
+  mode: Mode;
+  setMode: (m: Mode) => void;
+  seed: string | null;
+  setSeed: (msg: string | null) => void;
+}
+
+export const Bubble = ({ mode, setMode, seed, setSeed }: BubbleProps) => {
   const [open, setOpen] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // const [inputFocus, setInputFocus] = useState(false);
@@ -44,9 +53,18 @@ export const Bubble = () => {
     setMessages,
   } = useChat({
     keepLastMessageOnError: true,
+    body: { mode },
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (seed) {
+      append({ role: "user", content: seed });
+      handleSubmit();
+      setSeed(null);
+    }
+  }, [seed, append, handleSubmit, setSeed]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -57,15 +75,18 @@ export const Bubble = () => {
       icon: <IconBook className="h-6 w-6 text-purple-500" />,
       title: "Study Mode",
       content: "study mode",
+      mode: "study" as Mode,
     },
     {
       icon: <IconQuestionMark className="h-6 w-6 text-green-500" />,
       title: "Quiz Mode",
       content: "quiz me",
+      mode: "quiz" as Mode,
     },
   ];
 
-  const handleBlockClick = (content: string) => {
+  const handleBlockClick = (content: string, m: Mode) => {
+    setMode(m);
     append({
       role: "user",
       content: content,
@@ -182,7 +203,7 @@ export const Bubble = () => {
             >
               <div className="h-10 w-full bg-neutral-100 rounded-tr-lg rounded-tl-lg flex justify-between px-10 md:px-6 py-2 bg-gradient-to-l from-black via-gray-700 to-black">
                 <div className="font-medium text-sm flex items-center gap-2 text-white">
-                  <button 
+                  <button
                     onClick={() => {
                       setIsExpanded(!isExpanded);
                       const element = document.querySelector('.bubble-container');
@@ -194,6 +215,7 @@ export const Bubble = () => {
                   >
                     <IconMaximize className="h-4 w-4 text-white" />
                   </button>
+                  <span className="capitalize">{mode} mode</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {messages.length > 0 && (
@@ -250,7 +272,7 @@ export const Bubble = () => {
                       }}
                       key={block.title}
                       onClick={() => {
-                        handleBlockClick(block.content);
+                        handleBlockClick(block.content, block.mode);
                       }}
                       className="p-4 flex flex-col text-left justify-between rounded-2xl h-32 md:h-40 w-full bg-white"
                     >
@@ -277,9 +299,7 @@ export const Bubble = () => {
                       {message.role === "user" ? (
                         <UserMessage content={message.content} />
                       ) : (
-                        <>
-                          <AIMessage content={message.content} />
-                        </>
+                        <AIMessage content={message.content} mode={mode} />
                       )}
                     </div>
                   ))}
@@ -287,6 +307,22 @@ export const Bubble = () => {
                   {/* Add this div as scroll anchor */}
                 </div>
               </div>
+
+              {mode === "study" &&
+                messages[messages.length - 1]?.role === "assistant" &&
+                !isLoading && (
+                  <div className="px-5 pb-2">
+                    <button
+                      onClick={() => {
+                        append({ role: "user", content: "continue" });
+                        handleSubmit();
+                      }}
+                      className="rounded bg-black text-white px-3 py-1 text-sm"
+                    >
+                      Continue
+                    </button>
+                  </div>
+                )}
 
               <form
                 onSubmit={handleSubmit}
@@ -369,13 +405,71 @@ const UserMessage = ({ content }: { content: string }) => {
   );
 };
 
-const AIMessage = ({ content }: { content: string }) => {
+const AIMessage = ({ content, mode }: { content: string; mode: Mode }) => {
+  if (mode === "quiz") {
+    return <QuizMessage content={content} />;
+  }
   return (
     <div className="p-2 rounded-lg flex gap-2 items-start">
       <div className="h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-green-500 to-violet-600">
       </div>
       <div className="text-sm px-2 py-2 rounded-lg shadow-derek w-fit bg-white text-black">
         <Markdown>{useAnimatedText(content)}</Markdown>
+      </div>
+    </div>
+  );
+};
+
+const QuizMessage = ({ content }: { content: string }) => {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [checked, setChecked] = useState(false);
+  const lines = content.split("\n").map((l) => l.trim()).filter(Boolean);
+  const question = lines[0] || "";
+  const optionLines = lines.filter((l) => /^[A-D][\.|\)]/i.test(l)).slice(0, 4);
+  const options = optionLines.map((l) => ({ key: l[0].toUpperCase(), text: l.slice(2).trim() }));
+  const answerMatch = content.match(/Answer:\s*([A-D])/i) || content.match(/Correct Answer:\s*([A-D])/i);
+  const correct = answerMatch ? answerMatch[1].toUpperCase() : null;
+  const rationaleMatch = content.match(/Rationale:\s*(.*)/i);
+  const rationale = rationaleMatch ? rationaleMatch[1].trim() : "";
+
+  return (
+    <div className="p-2 rounded-lg flex gap-2 items-start w-full">
+      <div className="h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-green-500 to-violet-600"></div>
+      <div className="text-sm px-2 py-2 rounded-lg shadow-derek w-full bg-white text-black">
+        <p className="font-medium mb-2">{question}</p>
+        <ul className="space-y-1">
+          {options.map((opt) => (
+            <li key={opt.key}>
+              <button
+                onClick={() => setSelected(opt.key)}
+                className={cn(
+                  "w-full text-left rounded px-2 py-1",
+                  selected === opt.key ? "bg-gray-200" : "bg-gray-50"
+                )}
+              >
+                {opt.key}. {opt.text}
+              </button>
+            </li>
+          ))}
+        </ul>
+        {!checked ? (
+          <button
+            disabled={!selected}
+            onClick={() => setChecked(true)}
+            className="mt-2 rounded bg-black text-white px-2 py-1 disabled:opacity-50"
+          >
+            Check
+          </button>
+        ) : (
+          <div className="mt-2">
+            {selected === correct ? (
+              <span className="text-green-600 font-medium">Correct!</span>
+            ) : (
+              <span className="text-red-600 font-medium">Incorrect.</span>
+            )}
+            {rationale && <span className="ml-2">{rationale}</span>}
+          </div>
+        )}
       </div>
     </div>
   );

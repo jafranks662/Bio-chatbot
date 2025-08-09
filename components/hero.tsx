@@ -5,9 +5,22 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Balancer from "react-wrap-balancer";
 
-export function Hero() {
+type Mode = "study" | "quiz";
+
+interface HeroProps {
+  mode: Mode;
+  setMode: (m: Mode) => void;
+  setSeed: (msg: string) => void;
+}
+
+export function Hero({ mode, setMode, setSeed }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
+
+  const handleModeClick = (m: Mode, message: string) => {
+    setMode(m);
+    setSeed(message);
+  };
 
   return (
     <div
@@ -72,12 +85,24 @@ export function Hero() {
       </p>
       <div className="mb-10 mt-8 flex w-full flex-col items-center justify-center gap-4 px-8 sm:flex-row md:mb-20">
         <button
-          className="group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg bg-black p-px px-4 py-2 text-center text-sm font-semibold leading-6 text-white transition duration-200  sm:w-52"
+          onClick={() => handleModeClick("study", "study mode")}
+          className={cn(
+            "group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg p-px px-4 py-2 text-center text-sm font-semibold leading-6 transition duration-200 sm:w-52",
+            mode === "study"
+              ? "bg-black text-white"
+              : "bg-white text-black shadow-input hover:-translate-y-0.5"
+          )}
         >
           Study Mode
         </button>
         <button
-          className="group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg bg-white p-px px-4 py-2 text-sm font-semibold leading-6 text-black shadow-input transition duration-200 hover:-translate-y-0.5  sm:w-52"
+          onClick={() => handleModeClick("quiz", "quiz me")}
+          className={cn(
+            "group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg p-px px-4 py-2 text-sm font-semibold leading-6 transition duration-200 sm:w-52",
+            mode === "quiz"
+              ? "bg-black text-white"
+              : "bg-white text-black shadow-input hover:-translate-y-0.5"
+          )}
         >
           Quiz Mode
         </button>
