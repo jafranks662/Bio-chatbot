@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Balancer from "react-wrap-balancer";
-import Link from "next/link";
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,18 +71,16 @@ export function Hero() {
         ease. Built in collaboration with Neon.tech and Aceternity
       </p>
       <div className="mb-10 mt-8 flex w-full flex-col items-center justify-center gap-4 px-8 sm:flex-row md:mb-20">
-        <Link
-          href="#"
-          className="group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg bg-black p-px px-4 py-2 text-center text-sm font-semibold leading-6 text-white no-underline transition duration-200  sm:w-52"
+        <button
+          className="group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg bg-black p-px px-4 py-2 text-center text-sm font-semibold leading-6 text-white transition duration-200  sm:w-52"
         >
-          Read Documentation
-        </Link>
-        <Link
-          href="/pricing"
-          className="group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg bg-white p-px px-4 py-2 text-sm font-semibold leading-6 text-black no-underline shadow-input transition duration-200 hover:-translate-y-0.5  sm:w-52"
+          Study Mode
+        </button>
+        <button
+          className="group relative z-20 flex h-10 w-full cursor-pointer items-center justify-center space-x-2 rounded-lg bg-white p-px px-4 py-2 text-sm font-semibold leading-6 text-black shadow-input transition duration-200 hover:-translate-y-0.5  sm:w-52"
         >
-          Explore Neon
-        </Link>
+          Quiz Mode
+        </button>
       </div>
       <div
         ref={containerRef}

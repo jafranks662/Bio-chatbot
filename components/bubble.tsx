@@ -2,13 +2,11 @@
 import {
   IconArrowNarrowDown,
   IconArrowNarrowUp,
-  IconAssembly,
-  IconBrandMessenger,
+  IconBook,
+  IconQuestionMark,
   IconMessage,
   IconPlayerStopFilled,
   IconPlus,
-  IconSeo,
-  IconTerminal2,
   IconX,
   IconMaximize,
 } from "@tabler/icons-react";
@@ -56,24 +54,14 @@ export const Bubble = () => {
 
   const blocks = [
     {
-      icon: <IconSeo className="h-6 w-6 text-purple-500" />,
-      title: "SEO Tips",
-      content: "How can I improve my blog on tech",
+      icon: <IconBook className="h-6 w-6 text-purple-500" />,
+      title: "Study Mode",
+      content: "study mode",
     },
     {
-      icon: <IconTerminal2 className="h-6 w-6 text-indigo-500" />,
-      title: "Code",
-      content: "How to center a div with Tailwind CSS",
-    },
-    {
-      icon: <IconBrandMessenger className="h-6 w-6 text-pink-500" />,
-      title: "Communication",
-      content: "How to improve communication with my team",
-    },
-    {
-      icon: <IconAssembly className="h-6 w-6 text-orange-500" />,
-      title: "Productivity",
-      content: "How to increase productivity in my work while being occupied",
+      icon: <IconQuestionMark className="h-6 w-6 text-green-500" />,
+      title: "Quiz Mode",
+      content: "quiz me",
     },
   ];
 
