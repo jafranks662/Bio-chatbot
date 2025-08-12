@@ -1,7 +1,10 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamText, embed } from "ai";
 import { neon } from "@neondatabase/serverless";
 import { env } from "@/lib/env";
+import { toSql } from "pgvector";
+
+export const runtime = "nodejs";
 
 const sql = neon(env.DATABASE_URL);
 
@@ -15,7 +18,7 @@ export async function GET(req: Request) {
 
   try {
     const rows = await sql`
-      SELECT user_message, assistant_message, created_at
+      SELECT role, content, created_at
       FROM chat_history
       WHERE session_id = ${sessionId}
       ORDER BY created_at ASC
@@ -28,16 +31,26 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { messages, sessionId } = await req.json();
+  const { messages, sessionId, mode } = await req.json();
+  if (!env.OPENAI_API_KEY || !env.DATABASE_URL) {
+    return new Response("Missing environment variables", { status: 400 });
+  }
+
   const lastMessage = messages[messages.length - 1];
 
+  const { embedding } = await embed({
+    model: openai.embedding("text-embedding-3-small"),
+    value: lastMessage.content,
+  });
+
   const contextRows = await sql`
-    SELECT content FROM biology_content
-    WHERE to_tsvector('english', content) @@ plainto_tsquery(${lastMessage.content})
+    SELECT standard, topic, chunk
+    FROM content_chunks
+    ORDER BY embedding <-> ${toSql(embedding)}::vector
     LIMIT 5
   `;
 
-  const context = contextRows.map((r: any) => r.content).join("\n");
+  const context = contextRows.map((r: any) => r.chunk).join("\n");
 
   if (!context) {
     return new Response("I don't know.");
@@ -82,22 +95,16 @@ Quiz me ->
 Switch modes when the user types "quiz me" or "study mode".`,
     messages: [
       ...messages,
+      { role: "system", content: `MODE:${mode}` },
       { role: "system", content: `CONTEXT:\n${context}` },
     ],
     onFinish: async (completion) => {
+      if (!sessionId) return;
       try {
         await sql`
-          INSERT INTO chat_history (
-            session_id,
-            user_message,
-            assistant_message,
-            created_at
-          ) VALUES (
-            ${sessionId},
-            ${lastMessage.content},
-            ${completion},
-            NOW()
-          )
+          INSERT INTO chat_history (session_id, role, content) VALUES
+          (${sessionId}, 'user', ${lastMessage.content}),
+          (${sessionId}, 'assistant', ${completion})
         `;
       } catch (error) {
         console.error('Error saving to database:', error);
