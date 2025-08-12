@@ -21,7 +21,14 @@ import { useChat } from "ai/react";
 import Markdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
-export const Bubble = () => {
+interface BubbleProps {
+  mode: "study" | "quiz";
+  onModeChange: (mode: "study" | "quiz") => void;
+  seedMessage?: string | null;
+  onSeeded?: () => void;
+}
+
+export const Bubble = ({ mode, onModeChange, seedMessage, onSeeded }: BubbleProps) => {
   const [open, setOpen] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   // const [inputFocus, setInputFocus] = useState(false);
@@ -44,6 +51,7 @@ export const Bubble = () => {
     setMessages,
   } = useChat({
     keepLastMessageOnError: true,
+    body: { mode },
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -57,22 +65,32 @@ export const Bubble = () => {
       icon: <IconBook className="h-6 w-6 text-purple-500" />,
       title: "Study Mode",
       content: "study mode",
+      mode: "study" as const,
     },
     {
       icon: <IconQuestionMark className="h-6 w-6 text-green-500" />,
       title: "Quiz Mode",
       content: "quiz me",
+      mode: "quiz" as const,
     },
   ];
 
-  const handleBlockClick = (content: string) => {
+  const handleBlockClick = (block: { content: string; mode: "study" | "quiz" }) => {
+    onModeChange(block.mode);
     append({
       role: "user",
-      content: content,
+      content: block.content,
     });
-
     handleSubmit();
   };
+
+  useEffect(() => {
+    if (seedMessage) {
+      append({ role: "user", content: seedMessage });
+      handleSubmit();
+      onSeeded && onSeeded();
+    }
+  }, [seedMessage, append, handleSubmit, onSeeded]);
 
   useEffect(() => {
     const handleUserScroll = () => {
@@ -250,7 +268,7 @@ export const Bubble = () => {
                       }}
                       key={block.title}
                       onClick={() => {
-                        handleBlockClick(block.content);
+                        handleBlockClick(block);
                       }}
                       className="p-4 flex flex-col text-left justify-between rounded-2xl h-32 md:h-40 w-full bg-white"
                     >
