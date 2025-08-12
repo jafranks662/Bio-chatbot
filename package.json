@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "echo \"No tests yet\"",
+    "db:setup": "psql $DATABASE_URL -f schema.sql"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.71",
@@ -23,7 +25,8 @@
     "react-textarea-autosize": "^8.5.4",
     "react-wrap-balancer": "^1.1.1",
     "tailwind-merge": "^2.5.4",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20",

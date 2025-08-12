@@ -1,11 +1,47 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { neon } from '@neondatabase/serverless';
+import { neon } from "@neondatabase/serverless";
+import { env } from "@/lib/env";
 
-const sql = neon(process.env.DATABASE_URL!);
+const sql = neon(env.DATABASE_URL);
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const sessionId = searchParams.get("sessionId");
+
+  if (!sessionId) {
+    return new Response("Missing sessionId", { status: 400 });
+  }
+
+  try {
+    const rows = await sql`
+      SELECT user_message, assistant_message, created_at
+      FROM chat_history
+      WHERE session_id = ${sessionId}
+      ORDER BY created_at ASC
+    `;
+    return Response.json(rows);
+  } catch (error) {
+    console.error("Error fetching history:", error);
+    return new Response("Error fetching history", { status: 500 });
+  }
+}
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages, sessionId } = await req.json();
+  const lastMessage = messages[messages.length - 1];
+
+  const contextRows = await sql`
+    SELECT content FROM biology_content
+    WHERE to_tsvector('english', content) @@ plainto_tsquery(${lastMessage.content})
+    LIMIT 5
+  `;
+
+  const context = contextRows.map((r: any) => r.content).join("\n");
+
+  if (!context) {
+    return new Response("I don't know.");
+  }
 
   const result = await streamText({
     model: openai("gpt-4-turbo"),
@@ -44,16 +80,20 @@ Quiz me ->
 5. List of missed questions with correct answers and brief explanations
 
 Switch modes when the user types "quiz me" or "study mode".`,
-    messages,
+    messages: [
+      ...messages,
+      { role: "system", content: `CONTEXT:\n${context}` },
+    ],
     onFinish: async (completion) => {
       try {
-        const lastMessage = messages[messages.length - 1];
         await sql`
           INSERT INTO chat_history (
+            session_id,
             user_message,
             assistant_message,
             created_at
           ) VALUES (
+            ${sessionId},
             ${lastMessage.content},
             ${completion},
             NOW()
