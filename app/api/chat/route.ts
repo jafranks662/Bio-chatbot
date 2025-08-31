@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText, embed } from "ai";
 import { neon } from "@neondatabase/serverless";
-import { env } from "@/lib/env";
+import { env } from "../../../lib/env";
 import { toSql } from "pgvector";
 
 export const runtime = "nodejs";

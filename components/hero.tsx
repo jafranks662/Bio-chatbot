@@ -10,6 +10,7 @@ interface HeroProps {
 }
 
 export function Hero({ onModeSelect }: HeroProps) {
+  // Reference to the container element for collision animations
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
