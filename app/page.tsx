@@ -1,3 +1,5 @@
+"use client";
+
 import { Bubble } from "@/components/bubble";
 import { Hero } from "@/components/hero";
 import { useState } from "react";
