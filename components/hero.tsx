@@ -13,7 +13,8 @@ interface HeroProps {
   setSeed: (msg: string | null) => void;
    
 export function Hero({ mode, setMode, setSeed }: HeroProps) {
-  cost containerRef = useRef<HTMLDivElement>(null);
+   }
+const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const handleModeClick = (m: Mode, message: string) => {
