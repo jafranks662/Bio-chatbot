@@ -11,8 +11,8 @@ intrface HeroProps {
    mode: Mode;
   setMode: (m: Mode) => void;
   setSeed: (msg: string | null) => void;
-eexport function Hero({ mode, setMode, setSeed }: HeroProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export function Hero({ mode, setMode, setSeed }: HeroProps) {
+  cost containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const handleModeClick = (m: Mode, message: string) => {
