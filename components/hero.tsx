@@ -7,7 +7,7 @@ import Balancer from "react-wrap-balancer";
 
 type Mode = "study" | "quiz";
 
-interface HeroProps {
+intrface HeroProps {
    mode: Mode;
   setMode: (m: Mode) => void;
   setSeed: (msg: string | null) => void;
