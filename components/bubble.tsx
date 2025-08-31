@@ -1,5 +1,5 @@
 "use client";
-// resolved conflict
+
 
 
 import {
@@ -56,7 +56,7 @@ export const Bubble = ({ mode, setMode, seed, setSeed }: BubbleProps) => {
     setMessages,
   } = useChat({
     keepLastMessageOnError: true,
-    body: { mode },
+    body: { mode, seed },
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
