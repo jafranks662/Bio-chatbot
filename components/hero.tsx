@@ -7,10 +7,11 @@ import Balancer from "react-wrap-balancer";
 
 type Mode = "study" | "quiz";
 
-intrface HeroProps {
+interface HeroProps {
    mode: Mode;
   setMode: (m: Mode) => void;
   setSeed: (msg: string | null) => void;
+   
 export function Hero({ mode, setMode, setSeed }: HeroProps) {
   cost containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
