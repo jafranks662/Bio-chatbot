@@ -6,7 +6,10 @@ import { toSql } from "pgvector";
 
 export const runtime = "nodejs";
 
-const sql = neon(env.DATABASE_URL);
+// Only initialize the Neon client when a DATABASE_URL is provided. This keeps
+// the module from throwing during build steps where the environment variable is
+// absent (e.g. on Vercel without a configured database).
+const sql = env.DATABASE_URL ? neon(env.DATABASE_URL) : null;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -14,6 +17,10 @@ export async function GET(req: Request) {
 
   if (!sessionId) {
     return new Response("Missing sessionId", { status: 400 });
+  }
+
+  if (!sql) {
+    return new Response("Database not configured", { status: 500 });
   }
 
   try {
@@ -32,7 +39,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const { messages, sessionId, mode } = await req.json();
-  if (!env.OPENAI_API_KEY || !env.DATABASE_URL) {
+  if (!env.OPENAI_API_KEY || !env.DATABASE_URL || !sql) {
     return new Response("Missing environment variables", { status: 400 });
   }
 

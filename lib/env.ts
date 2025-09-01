@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url(),
+  // DATABASE_URL may be undefined during build time (e.g. on Vercel),
+  // so mark it as optional to avoid validation errors when the variable
+  // isn't provided.
+  DATABASE_URL: z.string().url().optional(),
   OPENAI_API_KEY: z.string().min(1),
   OPENAI_ORG: z.string().optional(),
 });
