@@ -10,7 +10,10 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
-  DATABASE_URL: process.env.DATABASE_URL,
+  // Some platforms expose empty strings for missing env vars. Convert
+  // falsy values to `undefined` so optional validation passes instead of
+  // throwing an "Invalid url" error during builds.
+  DATABASE_URL: process.env.DATABASE_URL || undefined,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_ORG: process.env.OPENAI_ORG,
 });
