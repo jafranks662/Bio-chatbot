@@ -20,7 +20,7 @@ import {
 import { useChat } from "ai/react";
 import Markdown from "react-markdown";
 import { cn } from "@/lib/utils";
-import { standards, mainStandardOrder } from "@/lib/standards";
+import { standards, mainStandards } from "@/lib/standards";
 
 interface BubbleProps {
   mode: "study" | "quiz";
@@ -316,9 +316,9 @@ export const Bubble = ({ mode, onModeChange, seedMessage, onSeeded }: BubbleProp
                   className="border p-2 rounded flex-1"
                 >
                   <option value="">Select standard</option>
-                  {mainStandardOrder.map((key) => (
-                    <option key={key} value={key}>
-                      {key}
+                  {mainStandards.map((s) => (
+                    <option key={s.code} value={s.code}>
+                      {s.code} - {s.label}
                     </option>
                   ))}
                 </select>

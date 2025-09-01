@@ -71,10 +71,16 @@ export const standards: Record<string, SubStandard[]> = {
   ]
 };
 
-export const mainStandardOrder = [
-  "1A", "1B", "1C", "1D", "1E",
-  "2",
-  "3A", "3B", "3C",
-  "4",
-  "5"
+export const mainStandards = [
+  { code: "1A", label: "Studying Life" },
+  { code: "1B", label: "Chemistry of Life" },
+  { code: "1C", label: "Cell Structure and Function" },
+  { code: "1D", label: "Cell Transport" },
+  { code: "1E", label: "Cell Reproduction" },
+  { code: "2", label: "Cell Energy" },
+  { code: "3A", label: "Meiosis" },
+  { code: "3B", label: "Punnett Squares" },
+  { code: "3C", label: "DNA and Protein Synthesis" },
+  { code: "4", label: "Evolution" },
+  { code: "5", label: "Ecology" },
 ];
