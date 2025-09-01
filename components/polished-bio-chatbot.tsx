@@ -1,23 +1,12 @@
 import React, { useState } from 'react';
-import { IconBook, IconHelpCircle, IconSend, IconSettings, IconChevronDown, IconSparkles } from '@tabler/icons-react';
-import { standards } from '@/lib/standards';
+import { IconBook, IconHelpCircle, IconSend, IconSettings, IconSparkles } from '@tabler/icons-react';
+import { standards, mainStandards } from '@/lib/standards';
 
 export default function PolishedBioChatbot() {
   const [mode, setMode] = useState<'study' | 'quiz'>('study');
-  const [selectedTopic, setSelectedTopic] = useState('');
   const [message, setMessage] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  const topics = [
-    'Cell Biology',
-    'Genetics',
-    'Evolution',
-    'Ecology',
-    'Human Anatomy',
-    'Molecular Biology',
-    'Biochemistry',
-    'Photosynthesis',
-  ];
+  const [mainStandard, setMainStandard] = useState('');
+  const [subStandard, setSubStandard] = useState('');
 
   const quickActions = [
     { code: '1C1', label: 'Cell Structure and Function' },
@@ -123,33 +112,54 @@ export default function PolishedBioChatbot() {
         {/* Topic Selection */}
         <div className="bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 p-6 mb-6">
           <h2 className="text-lg font-semibold text-white mb-4">Select Topic</h2>
-          <div className="relative">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-left text-white hover:bg-white/15 transition-colors flex items-center justify-between"
+          <div className="flex flex-col md:flex-row gap-4">
+            <select
+              value={mainStandard}
+              onChange={(e) => {
+                setMainStandard(e.target.value);
+                setSubStandard('');
+              }}
+              className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white flex-1 focus:outline-none"
             >
-              <span className={selectedTopic ? 'text-white' : 'text-gray-400'}>
-                {selectedTopic || 'Choose a biology topic...'}
-              </span>
-              <IconChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute top-full mt-2 w-full bg-slate-800/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-10">
-                {topics.map((topic, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setSelectedTopic(topic);
-                      setIsDropdownOpen(false);
-                    }}
-                    className="w-full px-4 py-3 text-left text-white hover:bg-white/10 transition-colors first:rounded-t-xl last:rounded-b-xl"
-                  >
-                    {topic}
-                  </button>
+              <option value="" className="text-gray-400">
+                Choose a standard...
+              </option>
+              {mainStandards.map((s) => (
+                <option key={s.code} value={s.code} className="text-black">
+                  {s.code} - {s.label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={subStandard}
+              onChange={(e) => setSubStandard(e.target.value)}
+              disabled={!mainStandard}
+              className="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white flex-1 focus:outline-none disabled:opacity-50"
+            >
+              <option value="" className="text-gray-400">
+                Choose a topic...
+              </option>
+              {mainStandard &&
+                standards[mainStandard].map((opt) => (
+                  <option key={opt.code} value={opt.code} className="text-black">
+                    {opt.label}
+                  </option>
                 ))}
-              </div>
-            )}
+            </select>
+            <button
+              onClick={() => {
+                if (subStandard) {
+                  const label = getStandardLabel(subStandard);
+                  handleSendMessage(`Explain ${label} (${subStandard})`);
+                  setMainStandard('');
+                  setSubStandard('');
+                }
+              }}
+              disabled={!subStandard}
+              className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 disabled:from-gray-600 disabled:to-gray-600 text-white px-4 py-3 rounded-xl transition-all duration-200 disabled:cursor-not-allowed"
+            >
+              Ask
+            </button>
           </div>
         </div>
       </div>
