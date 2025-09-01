@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { IconBook, IconHelpCircle, IconSend, IconSettings, IconSparkles } from '@tabler/icons-react';
 import { standards, mainStandards } from '@/lib/standards';
