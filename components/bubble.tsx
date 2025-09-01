@@ -20,6 +20,7 @@ import {
 import { useChat } from "ai/react";
 import Markdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { standards, mainStandardOrder } from "@/lib/standards";
 
 interface BubbleProps {
   mode: "study" | "quiz";
@@ -39,6 +40,8 @@ export const Bubble = ({ mode, onModeChange, seedMessage, onSeeded }: BubbleProp
   const [isUserScrolledUp, setIsUserScrolledUp] = useState(false);
   const messageHistoryRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mainStandard, setMainStandard] = useState("");
+  const [subStandard, setSubStandard] = useState("");
 
   const {
     messages,
@@ -82,6 +85,27 @@ export const Bubble = ({ mode, onModeChange, seedMessage, onSeeded }: BubbleProp
       content: block.content,
     });
     handleSubmit();
+  };
+
+  const handleMainStandardChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    setMainStandard(e.target.value);
+    setSubStandard("");
+  };
+
+  const handleStandardSubmit = () => {
+    if (mainStandard && subStandard) {
+      const option = standards[mainStandard].find(
+        (o) => o.code === subStandard
+      );
+      if (option) {
+        append({ role: "user", content: `${option.code} ${option.label}` });
+        handleSubmit();
+        setMainStandard("");
+        setSubStandard("");
+      }
+    }
   };
 
   useEffect(() => {
@@ -285,6 +309,42 @@ export const Bubble = ({ mode, onModeChange, seedMessage, onSeeded }: BubbleProp
                   ))}
                 </div>
               )}
+              <div className="px-5 pt-2 flex gap-2">
+                <select
+                  value={mainStandard}
+                  onChange={handleMainStandardChange}
+                  className="border p-2 rounded flex-1"
+                >
+                  <option value="">Select standard</option>
+                  {mainStandardOrder.map((key) => (
+                    <option key={key} value={key}>
+                      {key}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={subStandard}
+                  onChange={(e) => setSubStandard(e.target.value)}
+                  disabled={!mainStandard}
+                  className="border p-2 rounded flex-1"
+                >
+                  <option value="">Select topic</option>
+                  {mainStandard &&
+                    standards[mainStandard].map((opt) => (
+                      <option key={opt.code} value={opt.code}>
+                        {opt.label}
+                      </option>
+                    ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleStandardSubmit}
+                  disabled={!subStandard}
+                  className="bg-gray-100 px-3 rounded"
+                >
+                  Go
+                </button>
+              </div>
               <div
                 ref={messageHistoryRef}
                 className="p-2 flex flex-1 overflow-y-auto"
