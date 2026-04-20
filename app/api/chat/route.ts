@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, embed } from "ai";
 import { neon } from "@neondatabase/serverless";
 import { env } from "../../../lib/env";
@@ -42,6 +42,11 @@ export async function POST(req: Request) {
   if (!env.OPENAI_API_KEY || !env.DATABASE_URL || !sql) {
     return new Response("Missing environment variables", { status: 400 });
   }
+  const openai = createOpenAI({
+    apiKey: env.OPENAI_API_KEY,
+    baseURL: env.OPENAI_BASE_URL,
+    organization: env.OPENAI_ORG,
+  });
 
   const lastMessage = messages[messages.length - 1];
 
