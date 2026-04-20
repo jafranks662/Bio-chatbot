@@ -5,7 +5,9 @@ const envSchema = z.object({
   // so mark it as optional to avoid validation errors when the variable
   // isn't provided.
   DATABASE_URL: z.string().url().optional(),
-  OPENAI_API_KEY: z.string().min(1),
+  // OPENAI_API_KEY is only required when calling the chat API at runtime.
+  // Keep it optional during build to avoid static build failures.
+  OPENAI_API_KEY: z.string().min(1).optional(),
   OPENAI_ORG: z.string().optional(),
 });
 
@@ -17,4 +19,3 @@ export const env = envSchema.parse({
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_ORG: process.env.OPENAI_ORG,
 });
-
