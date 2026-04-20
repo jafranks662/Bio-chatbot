@@ -127,13 +127,11 @@ export const Bubble = ({ mode, onModeChange, seedMessage, onSeeded }: BubbleProp
       }
     };
 
-    messageHistoryRef.current?.addEventListener("scroll", handleUserScroll);
+    const historyElement = messageHistoryRef.current;
+    historyElement?.addEventListener("scroll", handleUserScroll);
 
     return () => {
-      messageHistoryRef.current?.removeEventListener(
-        "scroll",
-        handleUserScroll
-      );
+      historyElement?.removeEventListener("scroll", handleUserScroll);
     };
   }, []);
 
